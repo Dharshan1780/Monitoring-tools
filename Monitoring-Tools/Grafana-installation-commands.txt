@@ -1,0 +1,32 @@
+Prerequisites:
+1. Kubernetes cluster running (e.g., Minikube)
+2. Helm installed
+3. kubectl installed and configured
+
+# 1. Add Grafana Helm repository
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# 2. Update Helm repositories
+helm repo update
+
+# 3. Create namespace (skip if already created)
+kubectl create namespace monitoring
+
+# 4. Install Grafana
+helm install grafana grafana/grafana --namespace monitoring
+
+# 5. Get your 'admin' user password by running:
+
+  " kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo " (base64 is a Linux/macOS command)
+
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String((kubectl get secret --namespace default grafana -o jsonpath="{.data.admin-password}")))   {for powershell}
+
+# 6. kubectl get svc -n monitoring
+	OUTPUT - NAME      TYPE        CLUSTER-IP     PORT(S)        AGE
+		grafana   ClusterIP   10.96.12.123   80/TCP          10m
+
+# 7. kubectl expose service grafana --type=NodePort --target-port=80 --name=grafana-ext --namespace=monitoring
+		OUTPUT - service/grafana-ext exposed
+
+# 8.kubectl get svc grafana-ext -n monitoring
+		OUTPUT - grafana-ext   NodePort   10.96.10.101   <none>   80:31123/TCP   1m
