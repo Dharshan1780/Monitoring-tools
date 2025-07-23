@@ -1,0 +1,35 @@
+Prerequisites:
+1. Helm installed - https://helm.sh/docs/intro/install/
+2. Minikube or a running Kubernetes cluster
+
+
+This command creates a new Kubernetes service that exposes an existing service (prometheus-server) externally via a NodePort, allowing access from outside the cluster 
+" kubectl expose service <SERVICE_NAME> --type=<TYPE> --port=<PORT> --target-port=<TARGET_PORT> --name=<NEW_SERVICE_NAME> -n <NAMESPACE> "
+" kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-ext "
+            OUTPUT - service/prometheus-server-ext exposed
+Kubernetes has successfully created a new service named prometheus-server-ext that:
+Forwards traffic to prometheus-server
+Uses NodePort type
+Targets port 9090 inside the pods (Prometheus default port)
+
+
+This command adds the Prometheus Helm chart repository to your local Helm setup.
+" helm repo add prometheus-community https://prometheus-community.github.io/helm-charts "
+" helm repo update "
+
+Install Prometheus
+" helm install prometheus prometheus-community/prometheus --namespace monitoring "
+
+Creating Namespace
+" kubectl create namespace monitoring "
+
+After Installation: Check Prometheus is Running
+" kubectl get pods -n monitoring "
+            OUTPUT -    prometheus-server-xxxxxxxx   1/1   Running
+                        prometheus-kube-state-metrics-xxxxx  1/1  Running
+
+Want to Access the Prometheus UI? After it's installed, expose it like this:
+" kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-ext -n monitoring "
+
+This will automatically open the Prometheus dashboard in your browser.
+" minikube service prometheus-server-ext -n monitoring "
